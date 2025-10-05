@@ -193,7 +193,7 @@ def borrarProducto():
         print("No hay productos para borrar.")
         return
     print("Productos disponibles:")
-    for idx, p in enumerate(lista_productos):
+    for idx, p in enumerate(lista_productos):   # 
         print(f"{idx+1}. {p}")
     sel = input("Seleccione el producto a borrar (0 para cancelar): ")
     if sel == "0":
@@ -214,7 +214,7 @@ def borrarCliente():
     sel = input("Seleccione el cliente a borrar (0 para cancelar): ")
     if sel == "0":
         return
-    if not sel.isdigit() or int(sel) < 1 or int(sel) > len(lista_clientes):
+    if not sel.isdigit() or int(sel) < 1 or int(sel) > len(lista_clientes): # Revisa que la cadena ingresada sólamente esté compuesta de números
         print("Opción inválida.")
         return
     c = lista_clientes.pop(int(sel)-1)
@@ -230,7 +230,7 @@ def borrarVendedor():
     sel = input("Seleccione el vendedor a borrar (0 para cancelar): ")
     if sel == "0":
         return
-    if not sel.isdigit() or int(sel) < 1 or int(sel) > len(lista_vendedores):
+    if not sel.isdigit() or int(sel) < 1 or int(sel) > len(lista_vendedores):# Revisa acá también que la cadena ingresada sólamente esté compuesta de números
         print("Opción inválida.")
         return
     v = lista_vendedores.pop(int(sel)-1)
@@ -285,9 +285,9 @@ def crearVendedor():
     print(f"Vendedor {nombre} creado!")
 
 
-def guardar_productos(lista_productos):
-    with open(archProductos, "w") as f:
-        for p in lista_productos:
+def guardar_productos(lista_productos):     # Método para manejar carpetas
+    with open(archProductos, "w") as f:     
+        for p in lista_productos:           # Por cada producto, ingresa en el archivo de texto toda su información pertinente
             f.write(f"{p.nombre},{p.fechaVenc.dia},{p.fechaVenc.mes},{p.fechaVenc.anio},{p.fechaVenc.hora},{p.fechaVenc.minuto},{p.provision},{p.precio},{p.codigo},{p.marca}\n")
 
 def guardar_clientes(lista_clientes):
