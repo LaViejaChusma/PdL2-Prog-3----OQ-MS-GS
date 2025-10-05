@@ -1,19 +1,29 @@
-from __future__ import annotations
+from __future__ import annotations        # <--- Debido a que algunas clases son 
+                                          # interdependientes, debemos utilizar
+                                          # esta librería para evitar errores cuando
+                                          # hay un orden de declaración
 import os
+
+AZUL = '\033[1;34m'  # Código de escape ANSI para texto azul (color para los menús)
+RESET = '\033[0m'  # Color default
+
 
 # ---------------------------------------------------------
 #                 CLASE FECHA
 # ---------------------------------------------------------
 class Fecha:
-    def __init__(self, dia: int, mes: int, anio: int, hora: int, minuto: int):
-        self.dia = dia
+# Constructor con atributos de la clase Fecha, se declaran los tipos como int o str
+    def __init__(self, dia: int, mes: int, anio: int, hora: int, minuto: int):      
+        self.dia = dia       
         self.mes = mes
         self.anio = anio
         self.hora = hora
         self.minuto = minuto
 
-    def getFechaString(self):
+    def getFechaString(self):    # Método que al ser llamado, retorna una
+                                 # cadena de caracteres con datos de tiempo
         return f"{self.dia}/{self.mes}/{self.anio} → {self.hora:02d}:{self.minuto:02d}"
+
 
 # ---------------------------------------------------------
 #                 CLASE PRODUCTO
@@ -27,8 +37,10 @@ class Producto:
         self.codigo = codigo
         self.marca = marca
 
-    def __str__(self):
+    # Crea un método que muestra, en una cadena de caracteres, la información más importante del producto
+    def __str__(self):             
         return f"{self.nombre} ({self.marca}) - ${self.precio} | Stock: {self.provision}"
+
 
 # ---------------------------------------------------------
 #                 CLASE PERSONA
@@ -41,25 +53,29 @@ class Persona:
         self.correo = correo
         self.codigo = codigo
 
+
 # ---------------------------------------------------------
 #                 CLASE VENDEDOR
 # ---------------------------------------------------------
 class Vendedor(Persona):
     def __init__(self, nombre: str, fechaNac: Fecha, CI: int, correo: str, codigo: str,
                  productos: list = None, fechaIngreso: Fecha = None, patrimonio: float = 0.0):
-        super().__init__(nombre, fechaNac, CI, correo, codigo)
+        super().__init__(nombre, fechaNac, CI, correo, codigo)  # Invoca al constructor de la
+                    # superclase pertinente (Persona), para añadirle atributos adicionales
         self.productos = productos if productos is not None else []
         self.fechaIngreso = fechaIngreso
         self.patrimonio = patrimonio
 
-    def addProducto(self, producto: Producto):
-        for p in self.productos:
-            if p.codigo == producto.codigo:
-                p.provision += producto.provision
+    def addProducto(self, producto: Producto):  # Permite al vendedor reponer stock
+        for p in self.productos:    # Bucle que busca, en base al código del producto
+            if p.codigo == producto.codigo:     # su posición en la lista
+                p.provision += producto.provision   # Añade la cantidad ingresada por
+                                                    # el vendedor al stock del producto
                 print(f"Stock actualizado: {p.nombre} → {p.provision}")
                 return
-        self.productos.append(producto)
+        self.productos.append(producto)     # Si el producto todavía no existe, lo agrega a la lista
         print(f"Producto '{producto.nombre}' agregado al inventario.")
+
 
 # ---------------------------------------------------------
 #                 CLASE ITEMCOMPRA
@@ -68,39 +84,44 @@ class ItemCompra:
     def __init__(self, producto: Producto, cantidad: int):
         self.producto = producto
         self.cantidad = cantidad
-        self.subtotal = self.calcularSubtotal()
+        self.subtotal = self.calcularSubtotal() # Atributo interno que toma como valor
+                                                # el resultado de calcularSubtotal()
 
-    def calcularSubtotal(self):
+    def calcularSubtotal(self):   # Obtiene el subtotal multiplicando el precio por la cantidad
         return self.producto.precio * self.cantidad
 
-    def __str__(self):
+    def __str__(self):      # Método que devuelve string de la operación subtotal
         return f"{self.cantidad}x {self.producto.nombre} → Subtotal: ${self.subtotal}"
+
 
 # ---------------------------------------------------------
 #                 CLASE CLIENTE
 # ---------------------------------------------------------
-class Cliente(Persona):
+class Cliente(Persona):     # Subclase de Persona
     def __init__(self, nombre: str, fechaNac: Fecha, CI: int, correo: str, codigo: str,
                  carrito: list = None, fechaIngreso: Fecha = None, puntaje: int = 0):
-        super().__init__(nombre, fechaNac, CI, correo, codigo)
-        self.carrito = carrito if carrito is not None else []
+        super().__init__(nombre, fechaNac, CI, correo, codigo)  # Se le añaden atributos
+        self.carrito = carrito if carrito is not None else []   # Inicializa el carrito o
+                                      # con valores prestablecidos, o con una lista vacía
+        
         self.fechaIngreso = fechaIngreso
         self.puntaje = puntaje
 
     def addAlCarrito(self, producto: Producto, cantidad: int):
-        if producto.provision < cantidad:
-            print(f"No hay suficiente stock de {producto.nombre}.")
-            return
-        item = ItemCompra(producto, cantidad)
-        self.carrito.append(item)
-        producto.provision -= cantidad  # reduce stock
+        if producto.provision < cantidad:   # Chequea que haya un mayor stock que el valor
+            print(f"No hay suficiente stock de {producto.nombre}.") # que se desea comprar
+            return # Retorna
+        item = ItemCompra(producto, cantidad)   # Asigna a un ítem su producto y cantidad
+        self.carrito.append(item)       # Inserta el ítem a la lista 
+        producto.provision -= cantidad  # Reduce el stock por tantas unidades como el usuario haya seleccionado
         print(f"Se agregó {cantidad}x {producto.nombre} al carrito.")
 
     def vaciarCarrito(self):
-        self.carrito = []
+        self.carrito = []       # Intercambia la lista de ítems por una lista vacía
 
     def calcularTotal(self):
-        return sum(item.subtotal for item in self.carrito)
+        return sum(item.subtotal for item in self.carrito)  # Calcula total de la compra
+
 
 # ---------------------------------------------------------
 #                 CLASE COMPRA
@@ -115,21 +136,21 @@ class Compra:
         self.codigo = codigo
         self.estado = estado
 
-    def mostrarListado(self):
+    def mostrarListado(self): # Imprime el listado en pantalla con detalles de la compra
         print(f"\nFactura N° {self.numeroFactura} | Cliente: {self.cliente.nombre} | Estado: {self.estado}")
-        print("-" * 40)
-        for item in self.listado:
+        print("-" * 40)       # Líneas estéticas
+        for item in self.listado:   # Bucle que imprime cada ítem de la lista
             print(item)
-        print("-" * 40)
+        print("-" * 40)       # Más líneas estéticas
         print(f"Total a pagar: ${self.calcularTotal()}")
 
     def calcularTotal(self):
-        return sum(item.subtotal for item in self.listado)
+        return sum(item.subtotal for item in self.listado)  # Suma todos los subtotales de cada ítem
 
     def cancelarCompra(self):
         if self.estado != "Cancelada":
             for item in self.listado:
-                item.producto.provision += item.cantidad  # devolver stock
+                item.producto.provision += item.cantidad  # Devuelve el stock
             self.estado = "Cancelada"
             print(f"La compra {self.numeroFactura} ha sido cancelada.")
 
@@ -137,19 +158,20 @@ class Compra:
 #                 CLASE MENU
 # ---------------------------------------------------------
 class Menu:
-    @staticmethod
-    def menu():
-        print("\n--- MENU PRINCIPAL ---")
+    @staticmethod     # Permite utilizar el método sin tener que crear una
+    def menu():       # instancia de la clase Menu
+        print(AZUL + "\n --- MENU PRINCIPAL ---" + RESET)    # Muestra el menú de color azul
         print("1 - Consultar informaciones")
         print("2 - Crear informacion")
         print("3 - Borrar informacion")
         print("4 - Nueva compra")
         print("0 - Salir")
-        return input("Seleccione opción: ")
+        return input("Seleccione opción: ")     # Devuelve un valor correspondiente
+                                                # a la acción deseada
 
     @staticmethod
     def menuConsultar():
-        print("\n--- CONSULTAR ---")
+        print(AZUL + "\n--- CONSULTAR ---" + RESET)
         print("1 - Listar clientes")
         print("2 - Listar vendedores")
         print("3 - Listar productos")
@@ -160,8 +182,8 @@ class Menu:
 # ---------------------------------------------------------
 #                 FUNCIONES DE TXT
 # ---------------------------------------------------------
-archProductos = "dbProductos.txt"
-archClientes = "dbClientes.txt"
+archProductos = "dbProductos.txt"        # Crea los archivos de texto que
+archClientes = "dbClientes.txt"          # almacenarán la información deseada
 archVendedores = "dbVendedores.txt"
 archCompras = "dbCompras.txt"
 
@@ -383,7 +405,7 @@ if __name__ == "__main__":
                 crearProducto()
                 
         elif op == "3":  # Borrar informacion
-            print("\n--- BORRAR INFORMACION ---")
+            print(AZUL + "\n--- BORRAR INFORMACION ---" + RESET)
             print("1 - Borrar cliente")
             print("2 - Borrar vendedor")
             print("3 - Borrar producto")
@@ -438,5 +460,5 @@ if __name__ == "__main__":
             guardar_clientes(lista_clientes)
             guardar_vendedores(lista_vendedores)
             guardar_compras(lista_compras)
-            print("Datos guardados. Saliendo del programa...")
+            print('\033[1;32m' + "Datos guardados. Saliendo del programa..." + '\033[0m')
             break
